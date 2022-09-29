@@ -1,9 +1,11 @@
 #include <stdio.h>
 #include <string.h>
+#include "forca.h"
 
 char secretWord[20];
 char kicks[26];
-int tries = 0;
+int givenKicks = 0;
+
 
 void opening() {
 	printf("*************************\n");
@@ -15,13 +17,13 @@ void actionGuess() {
 	char guess;
 	scanf(" %c", &guess);
 
-	kicks[tries] = guess;
-	tries++;
+	kicks[givenKicks] = guess;
+	givenKicks++;
 }
 
 int alreadyGuess(char letter) {
 	int found = 0;
-	for(int j = 0; j < tries; j++) {
+	for(int j = 0; j < givenKicks; j++) {
 		if(kicks[j] == letter) {
 			found = 1;
 			break;
@@ -29,6 +31,20 @@ int alreadyGuess(char letter) {
 	}
 
 	return found;
+}
+
+void choseWord() {
+	sprintf(secretWord, "MELANCIA");
+}
+
+int correct() {
+	for(int i = 0; i < strlen(secretWord); i++) {
+		if(!alreadyGuess(secretWord[i])) {
+			return 0;
+		}
+	}
+
+	return 1;
 }
 
 void drawGallows() {
@@ -44,14 +60,24 @@ void drawGallows() {
 	printf("\n");
 }
 
-void choseWord() {
-	sprintf(secretWord, "MELANCIA");
+int isHanged() { 
+	int errors = 0;
+
+	for(int i = 0; i < givenKicks; i++) {
+		int exist = 0;
+		for(int j = 0; j < strlen(secretWord); j++) {
+			if(kicks[i] == secretWord[j]) {
+				exist = 1;
+				break;
+			}
+		}
+		if(!exist) errors++;
+	}
+
+	return errors >= 5;
 }
 
 int main() {
-	int correct = 0;
-	int hanged = 0;
-
 	choseWord();
 	opening();
 
@@ -59,5 +85,5 @@ int main() {
 		drawGallows();
 		actionGuess();
 
-	} while(!correct && !hanged);
+	} while(!correct() && !isHanged());
 }
