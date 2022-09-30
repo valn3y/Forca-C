@@ -2,6 +2,7 @@ void opening();
 void actionGuess();
 int alreadyGuess(char letter);
 void drawGallows();
-void choseWord();
+void chooseWord();
 int correct();
 int isHanged();
+void addWord();

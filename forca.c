@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
+#include <stdlib.h>
 #include "forca.h"
 
 char secretWord[20];
@@ -15,6 +17,7 @@ void opening() {
 
 void actionGuess() {
 	char guess;
+	printf("Qual letra? ");
 	scanf(" %c", &guess);
 
 	kicks[givenKicks] = guess;
@@ -33,8 +36,55 @@ int alreadyGuess(char letter) {
 	return found;
 }
 
-void choseWord() {
-	sprintf(secretWord, "MELANCIA");
+void addWord() {
+	char yesOrNo;
+	printf("Voce deseja adicionar uma palavra no jogo? (S/N) ");
+	scanf("%c", &yesOrNo);
+
+	if(yesOrNo == 'S') {
+		char newWord[20];
+		printf("Digite a nova palavra em letras maiúsculas: ");
+		scanf("%s", newWord);
+
+		FILE* f;
+		f = fopen("words.txt", "r+");
+		if(f == 0) {
+			printf("Banco de dados de palavras não disponível\n\n");
+			exit(1);
+		}
+
+		int quantityWords;
+		fscanf(f, "%d", &quantityWords);
+		quantityWords++;
+
+		fseek(f, 0, SEEK_SET);
+		fprintf(f, "%d", quantityWords);
+
+		fseek(f, 0, SEEK_END);
+		fprintf(f, "\n%s", newWord);
+		fclose(f);
+	}
+}
+
+void chooseWord() {
+	FILE* f;
+	f = fopen("words.txt", "r");
+	if(f == 0) {
+		printf("Desculpe, banco de dados não disponível\n\n");
+		exit(1);
+	}
+
+	int quantityWords;
+	fscanf(f, "%d", &quantityWords);
+
+	srand(time(0));
+	int random = rand() % quantityWords;
+
+	for(int i = 0; i <= random; i++) {
+		fscanf(f, "%s", secretWord);
+	}
+
+	fclose(f);
 }
 
 int correct() {
@@ -48,10 +98,10 @@ int correct() {
 }
 
 void drawGallows() {
+	printf("Você já deu %d chutes\n", givenKicks);
 	// start the game!!!
 	for(int i = 0; i < strlen(secretWord); i++) {
-		int found = alreadyGuess(secretWord[i]);
-		if(found) {
+		if(alreadyGuess(secretWord[i])) {
 			printf("%c ", secretWord[i]);
 		} else {
 			printf("_ ");
@@ -78,12 +128,14 @@ int isHanged() {
 }
 
 int main() {
-	choseWord();
 	opening();
+	chooseWord();
 
 	do {
 		drawGallows();
 		actionGuess();
 
 	} while(!correct() && !isHanged());
+
+	addWord();
 }
